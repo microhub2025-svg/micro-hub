@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Login / Register, Books, Comments, and Take Notes App</title>
+<style>
+  /* Base & reset */
+  :root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --background-color: #fff;
+    --text-color: #2c3e50;
+    --input-border: #cbd5e1;
+    --error-color: #ef4444;
+    --container-bg: #fff;
+    --shadow-color: rgba(0,0,0,0.1);
+    --nav-bg: rgba(255, 255, 255, 0.95);
+    --comments-bg: #e0e7ff;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .dark-mode {
+    --primary-color: #3b82f6;
+    --primary-hover: #60a5fa;
+    --background-color: #1f2937;
+    --text-color: #f3f4f6;
+    --input-border: #4b5563;
+    --container-bg: #374151;
+    --shadow-color: rgba(0,0,0,0.3);
+    --nav-bg: rgba(31, 41, 55, 0.95);
+    --comments-bg: #374151;
+  }
+
+  body {
+    font-family: var(--font-family);
+    background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 20px;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Container styling */
+  .container {
+    max-width: 400px;
+    margin: 20px auto;
+    background: var(--container-bg);
+    padding: 24px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+
+  .container:hover {
+    box-shadow: 0 12px 36px var(--shadow-color);
+  }
+
+  h1, h2 {
+    text-align: center;
+    margin-top: 0;
+    color: var(--primary-color);
+    user-select: none;
+  }
+
+  label {
+    display: block;
+    margin-top: 12px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 12px 14px;
+    margin-top: 6px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    outline-offset: 3px;
+    outline-color: transparent;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    resize: vertical;
+    box-sizing: border-box;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(37,99,235,0.3);
+    outline-color: var(--primary-color);
+  }
+
+  button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px 0;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    user-select: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+
+  button:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 12px 30px rgba(29, 78, 216, 0.55);
+    transform: translateY(-3px);
+  }
+
+  button:active {
+    transform: translateY(-1px);
+  }
+
+  .switch {
+    text-align: center;
+    margin-top: 16px;
+    cursor: pointer;
+    color: var(--primary-color);
+    font-weight: 600;
+    user-select: none;
+    transition: color 0.3s ease;
+  }
+
+  .switch:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+  }
+
+  .error {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-top: 8px;
+    min-height: 18px;
+    user-select: none;
+  }
+
+  #logoutBtn, #logoutBtnSettings, #logoutBtnNotes {
+    float: right;
+    background: var(--error-color);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 14px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #logoutBtn:hover, #logoutBtnSettings:hover, #logoutBtnNotes:hover {
+    background: #b91c1c;
+    box-shadow: 0 12px 32px rgba(185, 28, 28, 0.6);
+  }
+
+  #bookSection, #settingsSection, #profileSection, #notesSection {
+    display: none;
+    max-width: 720px;
+    margin: 60px auto;
+    background: var(--container-bg);
+    padding: 30px 35px;
+    border-radius: 14px;
+    box-shadow: 0 15px 40px var(--shadow-color);
+    position: relative;
+    transition: background-color 0.3s ease;
+  }
+
+  #profileSection {
+    background: white;
+    color: #333;
+    text-align: center;
+  }
+
+  #profileSection h1 {
+    user-select: text;
+  }
+
+  #profileSection img {
+    max-width: 200px;
+    height: auto;
+    margin-top: 20px;
+    border-radius: 12px;
+  }
+
+  #searchInput {
+    padding: 12px 16px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 10px;
+    border: 2px solid var(--input-border);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #searchInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+    outline-color: var(--primary-color);
+  }
+
+  #bookList {
+    max-height: 350px;
+    overflow-y: auto;
+  }
+
+  .book-item {
+    border-bottom: 1px solid var(--input-border);
+    padding: 16px 0;
+    transition: background-color 0.3s ease;
+  }
+
+  .book-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .book-item h3 {
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    color: var(--primary-color);
+    user-select: text;
+  }
+
+  .book-item p {
+    margin: 0 0 10px 0;
+    color: var(--text-color);
+    user-select: text;
+  }
+
+  .book-item button {
+    background: var(--primary-color);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    user-select: none;
+  }
+
+  .book-item button:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 10px 28px rgba(29, 78, 216, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .book-item button:active {
+    transform: translateY(-1px);
+  }
+
+  #pdfViewer {
+    width: 100%;
+    height: 600px;
+    border-radius: 14px;
+    border: 2px solid var(--input-border);
+    margin-top: 20px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  #pdfViewer.show {
+    display: block;
+    opacity: 1;
+  }
+
+  #closePdfBtn {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 22px;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #closePdfBtn.show {
+    display: inline-block;
+  }
+
+  #closePdfBtn:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 10px 28px rgba(29, 78, 216, 0.7);
+  }
+
+  /* Comment input & submit */
+  #commentInput {
+    margin-top: 30px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 1rem;
+    border: 2px solid var(--input-border);
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #commentInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.4);
+    outline-color: var(--primary-color);
+  }
+
+  #submitCommentBtn {
+    margin-top: 15px;
+    background: var(--primary-color);
+    border: none;
+    padding: 14px 0;
+    width: 100%;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+
+  #submitCommentBtn:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 12px 32px rgba(29, 78, 216, 0.55);
+    transform: translateY(-2px);
+  }
+
+  #submitCommentBtn:active {
+    transform: translateY(-1px);
+  }
+
+  /* Comments marquee container */
+  #commentsMarquee {
+    margin-top: 30px;
+    background: var(--comments-bg);
+    border-radius: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 38px;
+    line-height: 38px;
+    font-style: italic;
+    color: var(--text-color);
+    position: relative;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.15);
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+
+  #commentsMarquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marqueeAnim 35s linear infinite;
+  }
+
+  @keyframes marqueeAnim {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* Settings page styles */
+  .setting-item {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--input-border);
+  }
+
+  .setting-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: var(--primary-color);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(30px);
+  }
+
+  .font-option {
+    display: inline-block;
+    padding: 8px 15px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .font-option:hover, .font-option.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(37, 99, 235, 0.1);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .container, #bookSection, #settingsSection, #profileSection, #notesSection {
+      padding: 20px;
+      max-width: 90vw;
+    }
+    #pdfViewer {
+      height: 400px;
+    }
+  }
+
+  .container,
+  #bookSection,
+  #settingsSection,
+  #profileSection,
+  #notesSection {
+    margin: 60px auto; /* More space around the boxes */
+  }
+
+  /* Navigation Bar Styles */
+  #navBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -2px 20px var(--shadow-color);
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+    z-index: 1000;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+
+  #navBar.hidden {
+    transform: translateY(100%);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    margin: 0 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 60px;
+    text-decoration: none;
+    color: var(--text-color);
+  }
+
+  .nav-item:hover {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
+    transform: translateY(-5px);
+  }
+
+  .nav-item.active {
+    background: rgba(37, 99, 235, 0.15);
+    color: var(--primary-color);
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .nav-text {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Hide nav bar when PDF is open */
+  body.pdf-open #navBar {
+    transform: translateY(100%);
+  }
+
+  /* Welcome screen styles */
+  #welcomeScreen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+    z-index: 9999;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  #welcomeLogo svg {
+    filter: drop-shadow(0 0 8px #93c5fdcc);
+  }
+
+  #welcomeTitle {
+    font-size: 3rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  #welcomeSubtitle {
+    font-size: 1.3rem;
+    margin-top: 20px;
+    height: 1.5em;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid rgba(255,255,255,0.75);
+  }
+
+  /* WhatsApp button styles */
+  #whatsappBtn {
+    position: fixed;
+    bottom: 20px;
+    left: -10px; /* moved outside left by 10px */
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 8px; /* small size */
+    font-weight: 700;
+    font-size: 0; /* hide text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.5);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    z-index: 1100;
+    width: 44px;
+    height: 44px;
+  }
+
+  #whatsappBtn:hover {
+    background-color: #1ebe5b;
+    box-shadow: 0 10px 28px rgba(29, 166, 84, 0.65);
+    transform: translateY(-3px);
+  }
+
+  #whatsappBtn:active {
+    transform: translateY(-1px);
+  }
+
+  #whatsappBtn svg {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    fill: white;
+  }
+
+  /* Download button style */
+  .download-btn {
+    margin-left: 10px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    transition: background 0.3s ease, transform 0.25s ease, box-shadow 0.3s ease;
+    display: inline-block;
+    user-select: none;
+    text-decoration: none;
+  }
+
+  .download-btn:hover {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6);
+    transform: scale(1.05);
+  }
+
+  .download-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+  }
+
+  /* Pulse animation on the button to continuously attract sight */
+  @keyframes pulseGlow {
+    0% {
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+    100% {
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    }
+  }
+
+  .download-btn.pulse {
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- Welcome Screen -->
+<div id="welcomeScreen" role="img" aria-label="Welcome to Micro-Hub">
+  <div id="welcomeLogo" aria-hidden="true" style="margin-bottom: 35px;">
+    <img src="https://cdn.dribbble.com/userupload/35777322/file/original-db9f3b6af034a382038bb8e99b6a6ed8.jpg?resize=752x&vertical=center" alt="Micro-Hub Logo" width="120" height="110" style="filter: drop-shadow(0 0 8px #93c5fdcc);" />
+  </div>
+  <h1 id="welcomeTitle"></h1>
+  <p id="welcomeSubtitle"></p>
+</div>
+
+<div id="authSection" class="container" aria-label="Authentication section">
+  <!-- Register Form -->
+  <div id="registerDiv" role="form" aria-labelledby="registerHeading">
+    <h2 id="registerHeading">Register</h2>
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" autocomplete="given-name" required />
+    <label for="lastName">Last Name</label>
+    <input type="text" id="lastName" autocomplete="family-name" required />
+    <label for="regUsername">Username</label>
+    <input type="text" id="regUsername" autocomplete="username" required />
+    <label for="regPassword">Password</label>
+    <input type="password" id="regPassword" autocomplete="new-password" required />
+    <label for="dob">Date of Birth</label>
+    <input type="date" id="dob" required />
+    <button onclick="register()" aria-describedby="regError">Register</button>
+    <p class="error" id="regError" aria-live="assertive"></p>
+    <p class="switch" tabindex="0" role="button" onclick="showLogin()" onkeypress="if(event.key==='Enter'){showLogin();}">Already have an account? Login here</p>
+  </div>
+
+  <!-- Login Form -->
+  <div id="loginDiv" style="display:none;" role="form" aria-labelledby="loginHeading">
+    <h2 id="loginHeading">Login</h2>
+    <label for="loginUsername">Username</label>
+    <input type="text" id="loginUsername" autocomplete="username" required />
+    <label for="loginPassword">Password</label>
+    <input type="password" id="loginPassword" autocomplete="current-password" required />
+    <button onclick="login()" aria-describedby="loginError">Login</button>
+    <p class="error" id="loginError" aria-live="assertive"></p>
+    <p class="switch" tabindex="0" role="button" onclick="showRegister()" onkeypress="if(event.key==='Enter'){showRegister();}">Don't have an account? Register here</p>
+  </div>
+</div>
+
+<!-- Books Section -->
+<div id="bookSection" role="main" aria-label="Books and comments section">
+  <button id="logoutBtn" onclick="logout()" aria-label="Logout">Logout</button>
+  <h1>Available Books</h1>
+  <input type="search" id="searchInput" placeholder="Search books by name..." oninput="searchBooks()" aria-label="Search books" />
+  <div id="bookList" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+
+  <button id="closePdfBtn" onclick="closePDF()" aria-label="Close PDF viewer">Close PDF</button>
+  <iframe id="pdfViewer" title="PDF Viewer"></iframe>
+
+  <!-- Comments Input -->
+  <div style="margin-top:30px;">
+    <label for="commentInput"><b>Type your Comment:</b></label>
+    <textarea id="commentInput" rows="3" placeholder="Write your comment here..." aria-label="Write your comment"></textarea>
+    <button id="submitCommentBtn" onclick="submitComment()">Submit Comment</button>
+  </div>
+
+  <!-- Comments Marquee -->
+  <div id="commentsMarquee" aria-live="polite" aria-atomic="true"><span id="commentsText"></span></div>
+</div>
+
+<!-- Profile Section -->
+<div id="profileSection" role="main" aria-label="Profile section">
+  <h1>Come Very Soon</h1>
+  <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Coming Soon" />
+</div>
+
+<!-- Settings Section -->
+<div id="settingsSection" role="main" aria-label="Settings section">
+  <button id="logoutBtnSettings" onclick="logout()" aria-label="Logout">Logout</button>
+  <h1>Settings</h1>
+  
+  <div class="setting-item">
+    <div class="setting-title">Appearance</div>
+    <label>
+      <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+      Dark Mode
+    </label>
+  </div>
+  
+  <div class="setting-item">
+    <div class="setting-title">Font Selection</div>
+    <div>
+      <div class="font-option" onclick="changeFont('Segoe UI, Tahoma, Geneva, Verdana, sans-serif')" data-font="default">Default</div>
+      <div class="font-option" onclick="changeFont('Georgia, serif')" data-font="georgia">Georgia</div>
+      <div class="font-option" onclick="changeFont('Arial, Helvetica, sans-serif')" data-font="arial">Arial</div>
+      <div class="font-option" onclick="changeFont('Courier New, Courier, monospace')" data-font="courier">Courier</div>
+      <div class="font-option" onclick="changeFont('Verdana, Geneva, sans-serif')" data-font="verdana">Verdana</div>
+    </div>
+  </div>
+  
+  <div class="setting-item">
+    <div class="setting-title">Comments Display</div>
+    <label>
+      <input type="checkbox" id="marqueeToggle" onchange="toggleMarquee()">
+      Show Comments Marquee
+    </label>
+  </div>
+  
+  <div class="setting-item">
+    <div class="setting-title">Animation Effects</div>
+    <label>
+      <input type="checkbox" id="animationsToggle" onchange="toggleAnimations()">
+      Enable Animations
+    </label>
+  </div>
+  
+  <div class="setting-item">
+    <div class="setting-title">Data Management</div>
+    <button onclick="clearAllData()" style="background: #ef4444;">Clear All Data</button>
+    <p style="font-size: 0.8rem; margin-top: 10px;">This will remove all your comments and reset settings to default.</p>
+  </div>
+  
+  <button onclick="saveSettings()" style="margin-top: 30px;">Save Settings</button>
+</div>
+
+<!-- Notes Section -->
+<div id="notesSection" role="main" aria-label="Take notes section">
+  <button id="logoutBtnNotes" onclick="logout()" aria-label="Logout">Logout</button>
+  <h1>Take Notes</h1>
+
+<!-- Enhanced Formatting toolbar -->
+<div style="margin-bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+  <button type="button" onclick="format('bold')" aria-label="Bold (Ctrl+B)" title="Bold (Ctrl+B)" style="font-weight:bold; font-size: 14px; padding: 6px 9px; width: 30px; height: 30px;">&#x1D400;</button>
+  <button type="button" onclick="format('italic')" aria-label="Italic (Ctrl+I)" title="Italic (Ctrl+I)" style="font-style:italic; font-size: 14px; padding: 6px 9px; width: 30px; height: 30px;">&#x1D434;</button>
+  <button type="button" onclick="format('underline')" aria-label="Underline (Ctrl+U)" title="Underline (Ctrl+U)" style="font-size: 14px; padding: 6px 9px; width: 30px; height: 30px; text-decoration: underline;">&#x1D40D;</button>
+  <button type="button" onclick="format('strikeThrough')" aria-label="Strikethrough" title="Strikethrough" style="font-size: 14px; padding: 6px 9px; width: 30px; height: 30px; text-decoration: line-through;">S</button>
+  <button type="button" onclick="format('superscript')" aria-label="Superscript" title="Superscript" style="font-size: 10px; padding: 6px 9px; width: 22px; height: 22px; vertical-align: super;">X<sup>2</sup></button>
+  <button type="button" onclick="format('subscript')" aria-label="Subscript" title="Subscript" style="font-size: 10px; padding: 6px 9px; width: 22px; height: 22px; vertical-align: sub;">X<sub>2</sub></button>
+  <button type="button" onclick="format('insertOrderedList')" aria-label="Numbered List" title="Numbered List" style="font-size: 14px; padding: 6px 9px; width: 30px; height: 30px;">1.</button>
+  <button type="button" onclick="format('insertUnorderedList')" aria-label="Bulleted List" title="Bulleted List" style="font-size: 18px; padding: 6px 9px; width: 30px; height: 30px;">•</button>
+  <button type="button" onclick="format('undo')" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" style="font-size: 14px; padding: 6px 9px; width: 30px; height: 30px;">↺</button>
+  <button type="button" onclick="format('redo')" aria-label="Redo (Ctrl+Y)" title="Redo (Ctrl+Y)" style="font-size: 14px; padding: 6px 9px; width: 30px; height: 30px;">↻</button>
+</div>
+  <!-- Editable area -->
+  <div id="notesEditor" contenteditable="true" aria-label="Note-taking editor" style="width:100%;min-height:300px; padding:12px; border:2px solid var(--input-border); border-radius: 12px; background-color: var(--container-bg); color: var(--text-color); font-family: var(--font-family); overflow-y:auto; box-sizing: border-box;"></div>
+
+  <button onclick="saveNotes()" style="margin-top: 20px; background: var(--primary-color); border: none; color: white; padding: 14px 0; width: 100%; font-weight: 700; font-size: 1.1rem; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); user-select: none; transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;">Save Notes</button>
+</div>
+
+<!-- Navigation Bar -->
+<div id="navBar" class="hidden">
+  <a href="#" class="nav-item active" onclick="navigateTo('home')">
+    <div class="nav-icon">🏠</div> <!-- Home -->
+    <div class="nav-text">Home</div>
+  </a>
+  <a href="#" class="nav-item" onclick="navigateTo('books')">
+    <div class="nav-icon">📚</div> <!-- Books -->
+    <div class="nav-text">Books</div>
+  </a>
+  <a href="#" class="nav-item" onclick="navigateTo('comments')">
+    <div class="nav-icon">💬</div> <!-- Comments -->
+    <div class="nav-text">Comments</div>
+  </a>
+  <a href="#" class="nav-item" onclick="navigateTo('profile')">
+    <div class="nav-icon">👤</div> <!-- Profile -->
+    <div class="nav-text">Profile</div>
+  </a>
+  <a href="#" class="nav-item" onclick="navigateTo('settings')">
+    <div class="nav-icon">⚙️</div> <!-- Settings -->
+    <div class="nav-text">Settings</div>
+  </a>
+  <a href="#" class="nav-item" onclick="navigateTo('notes')">
+    <div class="nav-icon">📝</div> <!-- Take Notes -->
+    <div class="nav-text">Take Notes</div>
+  </a>
+</div>
+
+
+<!-- WhatsApp Button -->
+<button id="whatsappBtn" aria-label="Join WhatsApp channel" title="Join WhatsApp Channel" onclick="window.open('https://whatsapp.com/channel/0029VbBMGiDCsU9Iod06631E', '_blank')">
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24" style="display: block;">
+    <path d="M20.52 3.48A11.916 11.916 0 0012 0C5.37 0 0 5.37 0 12c0 2.12.65 4.08 1.75 5.72L0 24l6.46-1.69a11.94 11.94 0 005.54 1.43c6.63 0 12-5.37 12-12 0-3.2-1.25-6.2-3.48-8.56zm-8.52 18.7a10.49 10.49 0 01-5.32-1.54l-.38-.22-3.8 1 1-3.7-.25-.38a10.54 10.54 0 01-1.65-5.68c0-5.82 4.72-10.55 10.53-10.55 2.81 0 5.44 1.1 7.41 3.1a10.556 10.556 0 013.09 7.44c0 5.82-4.73 10.55-10.58 10.55zm5.76-7.25c-.31-.15-1.83-.91-2.12-1.02-.29-.11-.5-.16-.71.16-.21.31-.81 1.02-1 1.23-.18.21-.36.24-.67.08a8.5 8.5 0 01-2.5-1.54c-.92-.9-1.56-2.02-1.75-2.33-.18-.3-.02-.46.13-.61.14-.14.31-.35.47-.53a1.56 1.56 0 00.21-.35.28.28 0 000-.53c-.07-.04-.71-1.7-1-2.33-.26-.6-.53-.52-.71-.53h-.61c-.2 0-.53.07-.81.38s-1.06 1.04-1.06 2.55 1.09 2.96 1.24 3.17c.15.2 2.15 3.29 5.21 4.61a18.8 18.8 0 002.36 1.07 2.51 2.51 0 003-1.67c.26-1 .26-1.87.18-2.07-.07-.2-.28-.3-.59-.44z" fill="#fff"/>
+  </svg>
+</button>
+
+<script>
+  // Show/hide register/login forms
+  function showLogin(){
+    document.getElementById("registerDiv").style.display = "none";
+    document.getElementById("loginDiv").style.display = "block";
+    clearErrors();
+  }
+  function showRegister(){
+    document.getElementById("loginDiv").style.display = "none";
+    document.getElementById("registerDiv").style.display = "block";
+    clearErrors();
+  }
+  function clearErrors(){
+    document.getElementById("regError").innerText = "";
+    document.getElementById("loginError").innerText = "";
+  }
+
+  // Register user
+  function register(){
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+    const username = document.getElementById("regUsername").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const dob = document.getElementById("dob").value;
+
+    if(!firstName || !lastName || !username || !password || !dob){
+      document.getElementById("regError").innerText = "All fields are required.";
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    if(users.find(u => u.username.toLowerCase() === username.toLowerCase())){
+      document.getElementById("regError").innerText = "Username already taken.";
+      return;
+    }
+
+    users.push({firstName, lastName, username, password, dob});
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Registration successful! Please login.");
+    showLogin();
+  }
+
+  // Login user
+  function login(){
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    if(!username || !password){
+      document.getElementById("loginError").innerText = "Both fields are required.";
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+    let user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+
+    if(user){
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+      showBooksSection();
+      loadCommentsMarquee();
+    } else {
+      document.getElementById("loginError").innerText = "Invalid username or password.";
+    }
+  }
+
+  // Show books section after login
+  function showBooksSection(){
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("bookSection").style.display = "block";
+    document.getElementById("settingsSection").style.display = "none";
+    document.getElementById("profileSection").style.display = "none";
+    document.getElementById("notesSection").style.display = "none";
+    loadBooks();
+    showNavBar();
+    loadSettings();
+  }
+
+  // Show settings section
+  function showSettingsSection(){
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("bookSection").style.display = "none";
+    document.getElementById("settingsSection").style.display = "block";
+    document.getElementById("profileSection").style.display = "none";
+    document.getElementById("notesSection").style.display = "none";
+    showNavBar();
+    loadSettingsToForm();
+  }
+
+  // Show notes section
+  function showNotesSection() {
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("bookSection").style.display = "none";
+    document.getElementById("settingsSection").style.display = "none";
+    document.getElementById("profileSection").style.display = "none";
+    document.getElementById("notesSection").style.display = "block";
+    showNavBar();
+    loadNotes();
+  }
+
+  // Logout
+  function logout(){
+    localStorage.removeItem("loggedInUser");
+    document.getElementById("bookSection").style.display = "none";
+    document.getElementById("settingsSection").style.display = "none";
+    document.getElementById("profileSection").style.display = "none";
+    document.getElementById("notesSection").style.display = "none";
+    document.getElementById("authSection").style.display = "block";
+    clearErrors();
+    showLogin();
+    closePDF();
+    hideNavBar();
+  }
+
+  // Books and PDF viewing
+  let books = JSON.parse(localStorage.getItem("books") || "[]");
+  let filteredBooks = [...books];
+
+  function loadBooks(){
+    books = JSON.parse(localStorage.getItem("books") || "[]");
+    filteredBooks = [...books];
+    displayBooks(filteredBooks);
+  }
+
+  function displayBooks(bookArray) {
+    const bookList = document.getElementById("bookList");
+    bookList.innerHTML = "";
+    if (bookArray.length === 0) {
+      bookList.innerHTML = "<p>No books found.</p>";
+      return;
+    }
+    bookArray.forEach((book, i) => {
+      const downloadStatusText = book.allowDownload
+        ? "ðŸ“¥ Download Enabled"
+        : "ðŸ‘ï¸ View Only";
+
+      const downloadButton = book.allowDownload
+        ? `<a href="${book.pdf}" download="${book.name}.pdf" class="download-btn" style="margin-left:10px;padding:8px 14px;border:none;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer;">Download</a>`
+        : "";
+
+      const div = document.createElement("div");
+      div.className = "book-item";
+      div.innerHTML = `
+        <h3>${book.name} <span style="font-size:0.85rem;color:var(--primary-color);margin-left:10px;">${downloadStatusText}</span></h3>
+        <p>${book.brief}</p>
+        <button onclick="viewPDF(${i})" aria-label="View PDF for ${book.name}">View PDF</button>
+        ${downloadButton}
+      `;
+      bookList.appendChild(div);
+    });
+  }
+
+  function searchBooks(){
+    const q = document.getElementById("searchInput").value.toLowerCase();
+    filteredBooks = books.filter(b => b.name.toLowerCase().includes(q));
+    displayBooks(filteredBooks);
+  }
+
+  function viewPDF(index){
+    const pdfViewer = document.getElementById("pdfViewer");
+    const closeBtn = document.getElementById("closePdfBtn");
+    pdfViewer.src = filteredBooks[index].pdf + "#toolbar=0&navpanes=0&scrollbar=0";
+    pdfViewer.classList.add("show");
+    closeBtn.classList.add("show");
+    window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+    document.body.classList.add('pdf-open');
+  }
+
+  function closePDF(){
+    const pdfViewer = document.getElementById("pdfViewer");
+    const closeBtn = document.getElementById("closePdfBtn");
+    pdfViewer.classList.remove("show");
+    closeBtn.classList.remove("show");
+    setTimeout(() => { pdfViewer.src = ""; }, 500);
+    document.body.classList.remove('pdf-open');
+  }
+
+  // Comment system
+  function submitComment(){
+    const commentText = document.getElementById("commentInput").value.trim();
+    if(!commentText){
+      alert("Please type a comment before submitting.");
+      return;
+    }
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if(!user){
+      alert("You must be logged in to submit comments.");
+      return;
+    }
+
+    let comments = JSON.parse(localStorage.getItem("comments") || "[]");
+    comments.push({username: user.username, comment: commentText});
+    localStorage.setItem("comments", JSON.stringify(comments));
+    document.getElementById("commentInput").value = "";
+    loadCommentsMarquee();
+  }
+
+  function loadCommentsMarquee(){
+    // Check if marquee is enabled
+    const settings = JSON.parse(localStorage.getItem("userSettings") || "{}");
+    if (settings.marqueeEnabled === false) {
+      document.getElementById("commentsMarquee").style.display = "none";
+      return;
+    } else {
+      document.getElementById("commentsMarquee").style.display = "block";
+    }
+    
+    let comments = JSON.parse(localStorage.getItem("comments") || "[]");
+    if(comments.length === 0){
+      document.getElementById("commentsText").innerText = "No comments yet.";
+      return;
+    }
+ const commentTexts = comments.map(c => `${c.username}: ${c.comment}`).join(" · ");
+    const commentsTextSpan = document.getElementById("commentsText");
+
+    commentsTextSpan.innerText = commentTexts;
+  }
+
+  // Settings functions
+  function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem("userSettings") || "{}");
+    
+    // Apply dark mode if enabled
+    if (settings.darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+    
+    // Apply font if set
+    if (settings.fontFamily) {
+      document.documentElement.style.setProperty('--font-family', settings.fontFamily);
+    } else {
+      document.documentElement.style.removeProperty('--font-family');
+    }
+    
+    // Apply animations setting
+    if (settings.animationsEnabled === false) {
+      document.body.classList.add('no-animations');
+    } else {
+      document.body.classList.remove('no-animations');
+    }
+  }
+  
+  function loadSettingsToForm() {
+    const settings = JSON.parse(localStorage.getItem("userSettings") || "{}");
+    
+    // Set dark mode toggle
+    document.getElementById("darkModeToggle").checked = settings.darkMode || false;
+    
+    // Set marquee toggle
+    document.getElementById("marqueeToggle").checked = settings.marqueeEnabled !== false;
+    
+    // Set animations toggle
+    document.getElementById("animationsToggle").checked = settings.animationsEnabled !== false;
+    
+    // Set selected font
+    const fontOptions = document.querySelectorAll('.font-option');
+    fontOptions.forEach(option => {
+      option.classList.remove('selected');
+      if (option.getAttribute('data-font') === (settings.font || 'default')) {
+        option.classList.add('selected');
+      }
+    });
+  }
+  
+  function toggleDarkMode() {
+    const isDarkMode = document.getElementById("darkModeToggle").checked;
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }
+  
+  function changeFont(font) {
+    document.documentElement.style.setProperty('--font-family', font);
+    
+    // Update selected font UI
+    const fontOptions = document.querySelectorAll('.font-option');
+    fontOptions.forEach(option => option.classList.remove('selected'));
+    event.target.classList.add('selected');
+  }
+  
+  function toggleMarquee() {
+    // This will be applied when settings are saved
+  }
+  
+  function toggleAnimations() {
+    const animationsEnabled = document.getElementById("animationsToggle").checked;
+    if (animationsEnabled) {
+      document.body.classList.remove('no-animations');
+    } else {
+      document.body.classList.add('no-animations');
+    }
+  }
+  
+  function saveSettings() {
+    const settings = {
+      darkMode: document.getElementById("darkModeToggle").checked,
+      marqueeEnabled: document.getElementById("marqueeToggle").checked,
+      animationsEnabled: document.getElementById("animationsToggle").checked,
+      font: document.querySelector('.font-option.selected').getAttribute('data-font')
+    };
+    
+    localStorage.setItem("userSettings", JSON.stringify(settings));
+    alert("Settings saved successfully!");
+    
+    // Apply changes immediately
+    loadSettings();
+    loadCommentsMarquee();
+  }
+  
+  function clearAllData() {
+    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+      localStorage.removeItem("comments");
+      localStorage.removeItem("userSettings");
+      localStorage.removeItem("books");
+      alert("All data has been cleared. Page will reload.");
+      location.reload();
+    }
+  }
+
+  // Navigation functions
+  function showNavBar() {
+    const navBar = document.getElementById("navBar");
+    navBar.classList.remove("hidden");
+  }
+  
+  function hideNavBar() {
+    const navBar = document.getElementById("navBar");
+    navBar.classList.add("hidden");
+  }
+  
+  function navigateTo(page) {
+    // Remove active class from all items
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    // Add active class to clicked item
+    event.target.closest('.nav-item').classList.add('active');
+
+    // Hide all main sections first
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("bookSection").style.display = "none";
+    document.getElementById("settingsSection").style.display = "none";
+    document.getElementById("profileSection").style.display = "none";
+    document.getElementById("notesSection").style.display = "none";
+    
+    // Handle navigation based on page
+    switch(page) {
+      case 'home':
+        showBooksSection();
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        break;
+      case 'books':
+        showBooksSection();
+        document.getElementById('bookList').scrollIntoView({behavior: 'smooth'});
+        break;
+      case 'comments':
+        showBooksSection();
+        document.getElementById('commentInput').scrollIntoView({behavior: 'smooth'});
+        break;
+      case 'profile':
+        document.getElementById("profileSection").style.display = "block";
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        break;
+      case 'settings':
+        showSettingsSection();
+        break;
+      case 'notes':
+        showNotesSection();
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        break;
+    }
+  }
+
+  // Notes formatting toolbar
+  function format(command) {
+    document.execCommand(command, false, null);
+    document.getElementById('notesEditor').focus();
+  }
+
+  // Save notes to localStorage under user key
+  function saveNotes() {
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!user) {
+      alert("You must be logged in to save notes.");
+      return;
+    }
+    const notes = document.getElementById("notesEditor").innerHTML;
+    localStorage.setItem(`notes_${user.username}`, notes);
+    alert("Notes saved successfully.");
+  }
+
+  // Load notes for logged-in user
+  function loadNotes() {
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!user) return;
+    const savedNotes = localStorage.getItem(`notes_${user.username}`);
+    if (savedNotes) {
+      document.getElementById("notesEditor").innerHTML = savedNotes;
+    } else {
+      document.getElementById("notesEditor").innerHTML = "";
+    }
+  }
+
+  // Keyboard shortcuts for formatting inside notes editor
+  document.getElementById('notesEditor').addEventListener('keydown', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          format('bold');
+          break;
+        case 'i':
+          e.preventDefault();
+          format('italic');
+          break;
+        case 'u':
+          e.preventDefault();
+          format('underline');
+          break;
+      }
+    }
+  });
+
+  // On page load, check if logged in
+  window.onload = function(){
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    if(loggedInUser){
+      showBooksSection();
+      loadCommentsMarquee();
+    } else {
+      showLogin();
+    }
+    loadSettings();
+  };
+
+  // Random text scramble effect
+  function scrambleText(element, text, speed, callback) {
+    const chars = "!<>-_\\/[]{}â€”=+*^?#________";
+    let output = "";
+    let queue = [];
+    for (let i = 0; i < text.length; i++) {
+      queue.push({ from: "", to: text[i], start: Math.floor(Math.random() * 40), end: Math.floor(Math.random() * 40) + 40 });
+    }
+
+    let frame = 0;
+    function update() {
+      output = "";
+      let complete = 0;
+      for (let i = 0; i < queue.length; i++) {
+        let { from, to, start, end, char } = queue[i];
+        if (frame >= end) {
+          complete++;
+          output += to;
+        } else if (frame >= start) {
+          if (!char || Math.random() < 0.28) {
+            char = chars[Math.floor(Math.random() * chars.length)];
+            queue[i].char = char;
+          }
+          output += char;
+        } else {
+          output += from;
+        }
+      }
+      element.textContent = output;
+      if (complete === queue.length) {
+        if (callback) callback();
+      } else {
+        frame++;
+        setTimeout(update, speed);
+      }
+    }
+    update();
+  }
+
+  // Typing animation
+  function typeText(element, text, speed, callback) {
+    let i = 0;
+    function type() {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else if (callback) {
+        callback();
+      }
+    }
+    type();
+  }
+
+  // Show welcome screen on load
+  window.addEventListener("load", function () {
+    const welcomeScreen = document.getElementById("welcomeScreen");
+    const titleEl = document.getElementById("welcomeTitle");
+    const subEl = document.getElementById("welcomeSubtitle");
+
+    scrambleText(titleEl, "Micro-Hub", 30, function () {
+      setTimeout(function () {
+        typeText(subEl, "Get every book read here.", 80, function () {
+          setTimeout(function () {
+            welcomeScreen.style.transition = "opacity 0.8s ease";
+            welcomeScreen.style.opacity = 0;
+            setTimeout(() => {
+              welcomeScreen.style.display = "none";
+              // Show login/register
+              const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+              if (loggedInUser) {
+                showBooksSection();
+                loadCommentsMarquee();
+              } else {
+                showLogin();
+              }
+            }, 800);
+          }, 1000);
+        });
+      }, 500);
+    });
+  });
+</script>
+
+</body>
+</html> 
